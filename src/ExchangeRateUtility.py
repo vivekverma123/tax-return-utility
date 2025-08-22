@@ -31,17 +31,19 @@ class ExchangeRateUtility:
                 break
             temp = update(temp)
         return rate, temp_date
-        
+
     def getExchangeRate(self, date, cutOff=str(datetime.now().date())):
         rate = None
         dateStamp = datetime.strptime(date, "%Y-%m-%d")
         temp = dateStamp
+        if temp in self.date_to_rate:
+            return self.date_to_rate[temp_date], temp
+#        rate, temp_date = self._traverse(lambda temp: temp <= cutOff, lambda temp: temp + timedelta(days=1), temp)
+#        # No published exchange rate data upto the cutOff, look for the last available data prior to the date requested
+#        if rate is not None:
+#            return rate, temp_date
+
         cutOff = datetime.strptime(cutOff, "%Y-%m-%d")
-        rate, temp_date = self._traverse(lambda temp: temp <= cutOff, lambda temp: temp + timedelta(days=1), temp)
-        # No published exchange rate data upto the cutOff, look for the last available data prior to the date requested
-        if rate is not None:
-            return rate, temp_date
-            
         temp = dateStamp - timedelta(days=1)
         rate, temp_date = self._traverse(lambda temp: temp >= self.lower_limit, lambda temp: temp - timedelta(days=1), temp)
         
@@ -49,3 +51,4 @@ class ExchangeRateUtility:
             assert 0, f"Data not available for the requested date {date}"
 
         return rate, temp_date
+
