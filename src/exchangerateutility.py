@@ -32,7 +32,7 @@ class ExchangeRateUtility:
             temp = update(temp)
         return rate, temp_date
 
-    def getExchangeRate(self, date, cutOff=str(datetime.now().date())):
+    def get_exchange_rate(self, date, cutOff=str(datetime.now().date())):
         rate = None
         dateStamp = datetime.strptime(date, "%Y-%m-%d")
         temp = dateStamp

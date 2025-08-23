@@ -33,24 +33,24 @@ class StockPriceUtility:
 
         for row in rows:
             date = str(row['Date'].date())
-            exchngRt, _ = self.exchngRtUtil.getExchangeRate(date, self.endDate) 
+            exchngRt, _ = self.exchngRtUtil.get_exchange_rate(date, self.endDate) 
             priceLocalCurrency = row['High'] * exchngRt
             self.date_to_price[date] = (priceLocalCurrency, row['High'])
             if self.peakPrice < priceLocalCurrency:
                 self.peakPrice = priceLocalCurrency
                 self.peakedOn = date
 
-        exchngRt, _ = self.exchngRtUtil.getExchangeRate(str(rows[-1]['Date'].date()), self.endDate)  
+        exchngRt, _ = self.exchngRtUtil.get_exchange_rate(str(rows[-1]['Date'].date()), self.endDate)  
         self.closingPrice = rows[-1]['Close'] * exchngRt
         self.closedOn = str(rows[-1]['Date'].date())
 
-    def getPeak(self):
+    def get_global_peak(self):
         return self.peakedOn, self.peakPrice
 
-    def getClosing(self):
+    def get_closing(self):
         return self.closedOn, self.closingPrice
 
-    def getPrice(self, date):
+    def get_peak_price(self, date):
         rate = None
         dateStamp = datetime.strptime(date, "%Y-%m-%d")
         if dateStamp < datetime.strptime(self.startDate, "%Y-%m-%d") or dateStamp > datetime.strptime(self.endDate, "%Y-%m-%d"):

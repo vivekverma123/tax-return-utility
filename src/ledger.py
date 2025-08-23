@@ -110,3 +110,6 @@ class LedgerLoader:
                     print(f"Skipping unknown format file: {filename}")
         self._link_transactions_to_accounts(transactions, id_to_account)
 
+    def get_accounts(self):
+        return self.accounts
+
