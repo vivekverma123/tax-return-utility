@@ -53,7 +53,8 @@ class StockPriceUtility:
     def get_peak_price(self, date):
         rate = None
         dateStamp = datetime.strptime(date, "%Y-%m-%d")
-        if dateStamp < datetime.strptime(self.startDate, "%Y-%m-%d") or dateStamp > datetime.strptime(self.endDate, "%Y-%m-%d"):
+        if dateStamp < datetime.strptime(self.startDate, "%Y-%m-%d") or \
+            dateStamp > datetime.strptime(self.endDate, "%Y-%m-%d"):
             assert 0, f"For stock {self.ticker} requested date is out of range, reinitialize the class"
         while(rate is None and dateStamp>=self.cutOff):
             temp_date = str(dateStamp.date())

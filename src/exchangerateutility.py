@@ -14,12 +14,13 @@ class ExchangeRateUtility:
         self._initialize()
         
     def _initialize(self):
+        # DATE PDF_FILE TT_BUY TT_SELL BILL_BUY	BILL_SELL FOREX_TRAVEL_CARD BUY_FOREX_TRAVEL CARD_SELL CN_BUY CN_SELL
+        # For inward remittance TT_BUY is taken into account as the bank will buy foreign currency from you at that 
+        # exchange rate
         df = pd.read_csv(self.path)
         for row in df.itertuples():
             if row is None:
                 continue
-            # DATE PDF_FILE TT_BUY TT_SELL BILL_BUY	BILL_SELL FOREX_TRAVEL_CARD BUY_FOREX_TRAVEL CARD_SELL CN_BUY CN_SELL
-            # For inward remittance TT_BUY is taken into account as the bank will buy foreign currency from you at that exchange rate
             self.date_to_rate[row.DATE.split(" ")[0]] = row._3
             
     def _traverse(self, check, update, temp):
@@ -45,7 +46,8 @@ class ExchangeRateUtility:
 
         cutOff = datetime.strptime(cutOff, "%Y-%m-%d")
         temp = dateStamp - timedelta(days=1)
-        rate, temp_date = self._traverse(lambda temp: temp >= self.lower_limit, lambda temp: temp - timedelta(days=1), temp)
+        rate, temp_date = self._traverse(lambda temp: temp >= self.lower_limit, 
+                                            lambda temp: temp - timedelta(days=1), temp)
         
         if rate is None:
             assert 0, f"Data not available for the requested date {date}"

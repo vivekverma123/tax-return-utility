@@ -50,7 +50,8 @@ class LedgerLoader:
     def _detect_format(self, header: List[str]) -> str:
         if header == ['account_id', 'account_no', 'broker', 'address', 'zip_code', 'country', 'currency']:
             return 'account'
-        elif header == ['account_id', 'date', 'stock', 'lot_id', 'transaction_type', 'units', 'buy_price', 'sell_price']:
+        elif header == ['account_id', 'date', 'stock', 'lot_id', 'transaction_type', 'units', 'buy_price', 
+                        'sell_price']:
             return 'transaction'
         else:
             return 'unknown'
