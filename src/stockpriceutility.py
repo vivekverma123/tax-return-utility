@@ -32,12 +32,11 @@ class StockPriceUtility:
 
         for row in rows:
             date = str(row['Date'].date())
-            # round off to 2 decimal places
-            row['High'] = round(row['High'], 2)
-            row['Open'] = round(row['Open'], 2)
-            row['Close'] = round(row['Close'], 2)
+            row['High'] = row['High']
+            row['Open'] = row['Open']
+            row['Close'] = row['Close']
             exchngRt, date_exchange_rate = self.exchngRtUtil.get_exchange_rate(date, self.endDate)
-            priceLocalCurrency = round(row['High'] * exchngRt, 2)
+            priceLocalCurrency = row['High'] * exchngRt
             self.date_to_peak_price[date] = (priceLocalCurrency, row['High'], exchngRt, date_exchange_rate)
             self.date_to_open_price[date] = (row['Open'] * exchngRt, row['Open'], exchngRt, date)
 

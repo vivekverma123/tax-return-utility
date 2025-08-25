@@ -16,8 +16,6 @@ class Report_A3:
     gross_proceeds_redemption: float = 0.0
     gross_proceeds_holdings: float = 0.0
 
-DEBUG_DATE = ""
-
 # Intermediate class for processing transactions
 @dataclass
 class Lot:
@@ -89,6 +87,13 @@ class TransactionProcessor:
         lot.balance -= t1.units
         lot.gross_proceeds_holdings += gross_proceeds_holdings
 
+    def _process_split_transaction(self, t1):
+        for lot in self.lots:
+            if lot.stock != t1.stock:
+                continue
+            lot.balance *= t1.units
+        self.stock_split_multiplier[t1.stock] /= t1.units
+
     def _init_stock_price_util(self, stock, start_date, end_date):
         if stock in self.stock_price_util:
             return
@@ -115,13 +120,15 @@ class TransactionProcessor:
                         self._process_credit_transaction(t1, curr_date)
                     if t1.transaction_type==TransactionType.DEBIT:
                         self._process_debit_transaction(t1, curr_date)
+                    if t1.transaction_type==TransactionType.SPLIT:
+                        self._process_split_transaction(t1)
                     transaction_idx += 1
 
                 # Update peak value
                 for _, lot in self.lots.items():
                     self._init_stock_price_util(lot.stock, start_date, end_date)
                     price, meta_data = self.get_peak_stock_price(lot.stock, str(curr_date.date()))
-                    todays_peak = lot.balance * price
+                    todays_peak = round(lot.balance * price, 2)
                     if todays_peak > lot.peak_value:
                         lot.peak_value = todays_peak
                         lot.peak_value_metadata = meta_data
