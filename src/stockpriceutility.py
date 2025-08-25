@@ -20,10 +20,10 @@ class StockPriceUtility:
     def _initialize(self):
         # Query 30 days prior data, in case data for self.startDate and prior isn't available for some reason
         self.cutOff = datetime.strptime(self.startDate, "%Y-%m-%d") - timedelta(days=30)
-        end_date_excluded = datetime.strptime(self.endDate, "%Y-%m-%d") - timedelta(days=1)
+        end_date_excluded = datetime.strptime(self.endDate, "%Y-%m-%d") + timedelta(days=1)
         history = self.ticker.history(
             start=str(self.cutOff.date()),
-            end=self.endDate,
+            end=str(end_date_excluded.date()),
             interval="1d"
         )
         rows = history.reset_index().to_dict(orient='records')
@@ -41,10 +41,12 @@ class StockPriceUtility:
             self.date_to_open_price[date] = (row['Open'] * exchngRt, row['Open'], exchngRt, date)
 
         exchngRt, date_exchange_rate = self.exchngRtUtil.get_exchange_rate(self.endDate, self.endDate)
-        self.closingPrice = (rows[-1]['Close'] * exchngRt, rows[-1]['Close'], exchngRt, date_exchange_rate)
+        self.closingPrice = (rows[-1]['Close'] * exchngRt, rows[-1]['Close'], str(rows[-1]['Date'].date()), \
+                                exchngRt, date_exchange_rate)
 
     def get_closing(self):
-        return self.closingPrice
+        price = self.closingPrice
+        return self.closingPrice[0], self.closingPrice[1:]
 
     def get_peak_price(self, date):
         rate = None

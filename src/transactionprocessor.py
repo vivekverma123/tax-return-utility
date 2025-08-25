@@ -54,12 +54,12 @@ class TransactionProcessor:
                 self.stock_split_multiplier[transaction.stock] *= transaction.units
 
     def get_peak_stock_price(self, stock, date):
-        price = self.stock_price_util[stock].get_peak_price(date)
-        return price[0] * self.stock_split_multiplier[stock], price
+        price, meta_data = self.stock_price_util[stock].get_peak_price(date)
+        return price * self.stock_split_multiplier[stock], meta_data
 
     def get_closing_stock_price(self, stock):
-        price = self.stock_price_util[stock].get_closing()
-        return price[0] * self.stock_split_multiplier[stock], price
+        price, meta_data = self.stock_price_util[stock].get_closing()
+        return price * self.stock_split_multiplier[stock], meta_data
 
     def _identify_cy(self, date):
         return date.split("-")[0]
@@ -88,7 +88,7 @@ class TransactionProcessor:
         lot.gross_proceeds_holdings += gross_proceeds_holdings
 
     def _process_split_transaction(self, t1):
-        for lot in self.lots:
+        for _, lot in self.lots.items():
             if lot.stock != t1.stock:
                 continue
             lot.balance *= t1.units
@@ -105,7 +105,6 @@ class TransactionProcessor:
         self._pre_processing()
         year = int(self._identify_cy(self.transactions[0].date))
         current_year = int(datetime.now().year)
-        current_year = year
         transaction_idx = 0
         while(year <= current_year):
             curr_date = start_date = self._get_time(f"{year}-01-01")
