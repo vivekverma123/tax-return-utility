@@ -1,54 +1,51 @@
+import pandas as pd
 import yfinance as yf
 from datetime import datetime, timedelta
-    
+
 class StockPriceUtility:
 
     def __init__(self, stock, startDate, endDate, exchngRtUtil):
 
         self.ticker = yf.Ticker(stock)
+        self.stock = stock
         self.startDate = startDate
         self.endDate = endDate
         self.cutOff = None
-        self.peakPrice = None
-        self.peakedOn = None
         self.closingPrice = None
-        self.closedOn = None
         self.exchngRtUtil = exchngRtUtil
-        self.date_to_price = {}
+        self.date_to_peak_price = {}
+        self.date_to_open_price = {}
         self._initialize()
 
     def _initialize(self):
         # Query 30 days prior data, in case data for self.startDate and prior isn't available for some reason
         self.cutOff = datetime.strptime(self.startDate, "%Y-%m-%d") - timedelta(days=30)
+        end_date_excluded = datetime.strptime(self.endDate, "%Y-%m-%d") - timedelta(days=1)
         history = self.ticker.history(
             start=str(self.cutOff.date()),
             end=self.endDate,
             interval="1d"
         )
-        self.peakPrice = -1
         rows = history.reset_index().to_dict(orient='records')
-
         if len(rows) == 0:
             assert 0, f"Stock {self.ticker} data not available for the given date range"
 
         for row in rows:
             date = str(row['Date'].date())
-            exchngRt, _ = self.exchngRtUtil.get_exchange_rate(date, self.endDate) 
-            priceLocalCurrency = row['High'] * exchngRt
-            self.date_to_price[date] = (priceLocalCurrency, row['High'])
-            if self.peakPrice < priceLocalCurrency:
-                self.peakPrice = priceLocalCurrency
-                self.peakedOn = date
+            # round off to 2 decimal places
+            row['High'] = round(row['High'], 2)
+            row['Open'] = round(row['Open'], 2)
+            row['Close'] = round(row['Close'], 2)
+            exchngRt, date_exchange_rate = self.exchngRtUtil.get_exchange_rate(date, self.endDate)
+            priceLocalCurrency = round(row['High'] * exchngRt, 2)
+            self.date_to_peak_price[date] = (priceLocalCurrency, row['High'], exchngRt, date_exchange_rate)
+            self.date_to_open_price[date] = (row['Open'] * exchngRt, row['Open'], exchngRt, date)
 
-        exchngRt, _ = self.exchngRtUtil.get_exchange_rate(str(rows[-1]['Date'].date()), self.endDate)  
-        self.closingPrice = rows[-1]['Close'] * exchngRt
-        self.closedOn = str(rows[-1]['Date'].date())
-
-    def get_global_peak(self):
-        return self.peakedOn, self.peakPrice
+        exchngRt, date_exchange_rate = self.exchngRtUtil.get_exchange_rate(self.endDate, self.endDate)
+        self.closingPrice = (rows[-1]['Close'] * exchngRt, rows[-1]['Close'], exchngRt, date_exchange_rate)
 
     def get_closing(self):
-        return self.closedOn, self.closingPrice
+        return self.closingPrice
 
     def get_peak_price(self, date):
         rate = None
@@ -58,11 +55,15 @@ class StockPriceUtility:
             assert 0, f"For stock {self.ticker} requested date is out of range, reinitialize the class"
         while(rate is None and dateStamp>=self.cutOff):
             temp_date = str(dateStamp.date())
-            if temp_date in self.date_to_price:
-                rate = self.date_to_price[temp_date]
+            if temp_date in self.date_to_peak_price:
+                rate = self.date_to_peak_price[temp_date]
                 break
             dateStamp = dateStamp - timedelta(days=1)
         if rate is None:
             assert 0, f"Stock {self.ticker} data not available for the requested date {date}"
-        return rate
+        return rate[0], (rate[1], str(dateStamp.date()), rate[2], rate[3])
+
+    def get_open_price(self, date):
+        price = self.date_to_open_price[date]
+        return price[0], (price[1], date, price[2], price[3])
 

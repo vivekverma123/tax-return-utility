@@ -37,20 +37,20 @@ class InvestmentAccount:
     zip_code: str
     country: str
     currency: str
-    transactions: List[Transaction]
 
 class LedgerLoader:
 
     def __init__(self, path):
         self.path = path
         self.accounts = []
+        self.transactions = []
         self.id_to_account = {}
         self._initialize()
 
     def _detect_format(self, header: List[str]) -> str:
         if header == ['account_id', 'account_no', 'broker', 'address', 'zip_code', 'country', 'currency']:
             return 'account'
-        elif header == ['account_id', 'date', 'stock', 'lot_id', 'transaction_type', 'units', 'buy_price', 
+        elif header == ['account_id', 'date', 'stock', 'lot_id', 'transaction_type', 'units', 'buy_price',
                         'sell_price']:
             return 'transaction'
         else:
@@ -66,35 +66,43 @@ class LedgerLoader:
                 zip_code=row['zip_code'],
                 country=row['country'],
                 currency=row['currency'],
-                transactions=[]
             )
             id_to_account[account.account_id] = account
             self.accounts.append(account)
 
-    def _process_transaction(self, reader, transactions):
+    def _process_transaction(self, reader):
         for row in reader:
             transaction = Transaction(
                 account=None,
-                account_id=row['account_id'],
+                account_id=row.get('account_id') or -1,
                 date=row['date'],
                 stock=row['stock'],
-                lot_id=row['lot_id'],
+                lot_id=row.get('lot_id') or -1,
                 transaction_type=TransactionType[row['transaction_type'].upper()],
                 units=int(row['units']),
-                buy_price=float(row['buy_price']),
-                sell_price=float(row['sell_price'])
+                buy_price=float(row.get('buy_price') or 0.0),
+                sell_price=float(row.get('sell_price') or 0.0)
             )
-            transactions.append(transaction)
+            self.transactions.append(transaction)
 
-    def _link_transactions_to_accounts(self, transactions, id_to_account):
-        for transaction in transactions:
-            transaction.account = id_to_account[transaction.account_id]
-            id_to_account[transaction.account_id].transactions.append(transaction)
-        for account in self.accounts:
-            account.transactions.sort(key=lambda x: x.date)
+    def _link_transactions_to_accounts(self, id_to_account):
+        for transaction in self.transactions:
+            if transaction.account_id in id_to_account:
+                transaction.account = id_to_account[transaction.account_id]
+        transaction_type_to_key = {
+            TransactionType.SPLIT: 0,
+            TransactionType.CREDIT: 1,
+            TransactionType.DEBIT: 2
+        }
+        self.transactions.sort(
+            key=lambda x: (
+                x.date,
+                x.stock,
+                transaction_type_to_key[x.transaction_type]
+            )
+        )
 
     def _initialize(self):
-        transactions = []
         id_to_account = {}
         for filename in os.listdir(self.path):
             if not filename.endswith('.csv'):
@@ -106,11 +114,14 @@ class LedgerLoader:
                 if fmt == 'account':
                     self._process_account(reader, id_to_account)
                 elif fmt == 'transaction':
-                    self._process_transaction(reader, transactions)
+                    self._process_transaction(reader)
                 else:
                     print(f"Skipping unknown format file: {filename}")
-        self._link_transactions_to_accounts(transactions, id_to_account)
+        self._link_transactions_to_accounts(id_to_account)
 
     def get_accounts(self):
         return self.accounts
+
+    def get_transactions(self):
+        return self.transactions
 
