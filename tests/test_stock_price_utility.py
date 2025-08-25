@@ -33,3 +33,10 @@ def test_stock_price_utility_all_days(test_case_data):
     trading_days_retrieved = retrieve_queried_collection(trading_days_retrieved, '2023-01-01')
     assert trading_days_retrieved == trading_days
 
+def test_stock_price_utility_inclusivity(test_case_data):
+    trading_days = test_case_data
+    exchg_rt_utl = ExchangeRateUtility()
+    stockpriceutil = StockPriceUtility("MSFT", test_case_data[0], test_case_data[-1], exchg_rt_utl)
+    assert test_case_data[-1] in stockpriceutil.date_to_peak_price.keys()
+    assert test_case_data[0] in stockpriceutil.date_to_peak_price.keys()
+
