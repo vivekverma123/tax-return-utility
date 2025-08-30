@@ -35,12 +35,12 @@ class StockPriceUtility:
             row['High'] = row['High']
             row['Open'] = row['Open']
             row['Close'] = row['Close']
-            exchngRt, date_exchange_rate = self.exchngRtUtil.get_exchange_rate(date, self.endDate)
+            exchngRt, date_exchange_rate = self.exchngRtUtil.get_exchange_rate(date)
             priceLocalCurrency = row['High'] * exchngRt
             self.date_to_peak_price[date] = (priceLocalCurrency, row['High'], exchngRt, date_exchange_rate)
             self.date_to_open_price[date] = (row['Open'] * exchngRt, row['Open'], exchngRt, date)
 
-        exchngRt, date_exchange_rate = self.exchngRtUtil.get_exchange_rate(self.endDate, self.endDate)
+        exchngRt, date_exchange_rate = self.exchngRtUtil.get_exchange_rate(self.endDate)
         self.closingPrice = (rows[-1]['Close'] * exchngRt, rows[-1]['Close'], str(rows[-1]['Date'].date()), \
                                 exchngRt, date_exchange_rate)
 

@@ -34,18 +34,20 @@ class ExchangeRateUtility:
             temp = update(temp)
         return rate, temp_date
 
-    def get_exchange_rate(self, date, cutOff=str(datetime.now().date())):
+    def _get_last_date_of_previous_month(self, date):
+        date_stamp = datetime.strptime(date, "%Y-%m-%d")
+        first_day_of_current_month = date_stamp.replace(day=1)
+        last_day_of_previous_month = first_day_of_current_month - timedelta(days=1)
+        return str(last_day_of_previous_month.date())
+
+    def get_exchange_rate(self, date):
         if date in self.date_to_rate:
             return self.date_to_rate[date], date
-#        rate, temp_date = self._traverse(lambda temp: temp <= cutOff, lambda temp: temp + timedelta(days=1), temp)
-#        # No published exchange rate data upto the cutOff, look for the last available data prior to the date requested
-#        if rate is not None:
-#            return rate, temp_date
+
         rate = None
         dateStamp = datetime.strptime(date, "%Y-%m-%d")
         temp = dateStamp
 
-        cutOff = datetime.strptime(cutOff, "%Y-%m-%d")
         temp = dateStamp - timedelta(days=1)
         rate, temp_date = self._traverse(lambda temp: temp >= self.lower_limit,
                                             lambda temp: temp - timedelta(days=1), temp)
@@ -54,4 +56,7 @@ class ExchangeRateUtility:
             assert 0, f"Data not available for the requested date {date}"
 
         return (rate, temp_date)
+
+    def get_exchange_rate_last_month(self, date):
+        return self.get_exchange_rate(self._get_last_date_of_previous_month(date))
 
