@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  pull_request:
+ pull_request:
     branches:
       - main
 
@@ -33,7 +33,7 @@ jobs:
     - name: Run tests with pytest
       run: |
         export PYTHONPATH=$(pwd)/src
-        pytest  # Run pytest to execute the tests
+        pytest  -v # Run pytest to execute the tests
 
     - name: Upload test results to GitHub Actions
       if: success()  # Upload only if tests are successful
