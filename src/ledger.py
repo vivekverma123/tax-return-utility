@@ -3,7 +3,7 @@ import os
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Dict
+from typing import List
 
 class TransactionType(Enum):
     DEBIT = "debit"
@@ -15,8 +15,10 @@ class Transaction:
     account: "InvestmentAccount"
     # Same as InvestmentAccount.unique_id
     account_id: str
-    # Uniquely determines a lot of stocks, it's on the user to assign/maintain appropriate value here, the code will only perform 
-    # minimal validation
+    """
+    Uniquely determines a lot of stocks, it's on the user to assign/maintain appropriate value here, the code will only 
+    perform minimal validation
+    """
     date: str
     stock: str
     # Assign unique lot id, lot id's across different stocks shouldn't conflict under the same account
@@ -28,8 +30,11 @@ class Transaction:
 
 @dataclass
 class InvestmentAccount:
-    # Not same as account number, but a unique ID within this system in case multiple security accounts held by the individual
-    # It's on the user to ensure that this ID is unique and all the transactions refer this ID in the separate CSV file
+    """
+    Not same as account number, but a unique ID within this system in case multiple security accounts held by the
+    individual. It's on the user to ensure that this ID is unique and all the transactions refer this ID in the
+    separate CSV file
+    """
     account_id: str
     account_no: str
     broker: str
@@ -50,11 +55,10 @@ class LedgerLoader:
     def _detect_format(self, header: List[str]) -> str:
         if header == ['account_id', 'account_no', 'broker', 'address', 'zip_code', 'country', 'currency']:
             return 'account'
-        elif header == ['account_id', 'date', 'stock', 'lot_id', 'transaction_type', 'units', 'buy_price',
+        if header == ['account_id', 'date', 'stock', 'lot_id', 'transaction_type', 'units', 'buy_price',
                         'sell_price']:
             return 'transaction'
-        else:
-            return 'unknown'
+        return 'unknown'
 
     def _process_account(self, reader, id_to_account):
         for row in reader:
@@ -124,4 +128,3 @@ class LedgerLoader:
 
     def get_transactions(self):
         return self.transactions
-

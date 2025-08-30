@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from exchangerateutility import ExchangeRateUtility
-from ledger import TransactionType
-from stockpriceutility import StockPriceUtility
+from .exchangerateutility import ExchangeRateUtility
+from .ledger import TransactionType
+from .stockpriceutility import StockPriceUtility
 
 @dataclass
-class Report_A3:
+class ReportA3:
     invested_amount: float
     peak_value: float
     closing_balance: float
@@ -58,8 +58,7 @@ class TransactionProcessor:
         year, month, _ = date.split("-")
         if int(month) in range(1, 4):
             return year
-        else:
-            return str(int(year) + 1)
+        return str(int(year) + 1)
 
     def _pre_processing(self):
         self.stock_split_multiplier = {}
@@ -124,7 +123,7 @@ class TransactionProcessor:
             self.reports_stcg.setdefault(fy, []).append(cg)
 
     def _process_debit_transaction(self, t1, curr_date):
-        exchange_rate, exchange_rate_date = self.exchange_rate_util.get_exchange_rate(str(curr_date.date()))
+        exchange_rate, _ = self.exchange_rate_util.get_exchange_rate(str(curr_date.date()))
         lot = self.lots[t1.stock + "_" + t1.lot_id]
         gross_proceeds_holdings = round(t1.units * t1.sell_price * exchange_rate, 2)
         lot.balance -= t1.units
@@ -150,11 +149,11 @@ class TransactionProcessor:
         year = int(self._identify_cy(self.transactions[0].date))
         current_year = int(datetime.now().year)
         transaction_idx = 0
-        while(year <= current_year):
+        while year <= current_year:
             curr_date = start_date = self._get_time(f"{year}-01-01")
             end_date = self._get_time(f"{year}-12-31")
             self.stock_price_util = {}
-            while(curr_date <= end_date):
+            while curr_date <= end_date:
                 # Process transactions on this date
                 while(transaction_idx < len(self.transactions) and \
                     self._get_time(self.transactions[transaction_idx].date) == curr_date):
@@ -181,7 +180,7 @@ class TransactionProcessor:
             self.reports_a3[year] = {}
             for _, lot in self.lots.items():
                 price, meta_data = self.get_closing_stock_price(lot.stock)
-                self.reports_a3[year][lot.lot_id] = Report_A3(
+                self.reports_a3[year][lot.lot_id] = ReportA3(
                     invested_amount=lot.invested_amount,
                     peak_value=lot.peak_value,
                     gross_proceeds_holdings=lot.gross_proceeds_holdings,
@@ -195,4 +194,3 @@ class TransactionProcessor:
                 lot.gross_proceeds_holdings = 0
             year += 1
         return self.reports_a3, self.reports_ltcg, self.reports_stcg
-

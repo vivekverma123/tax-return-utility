@@ -1,5 +1,5 @@
-import pandas as pd
 from datetime import datetime, timedelta
+import pandas as pd
 
 PATH_PREFIX = "https://raw.githubusercontent.com"
 REPO_PATH = "sahilgupta/sbi-fx-ratekeeper"
@@ -22,7 +22,7 @@ class ExchangeRateUtility:
         for row in df.itertuples():
             if row is None:
                 continue
-            self.date_to_rate[row.DATE.split(" ")[0]] = row._3
+            self.date_to_rate[row.DATE.split(" ")[0]] = row[3]
 
     def _traverse(self, check, update, temp):
         rate = None
@@ -45,10 +45,10 @@ class ExchangeRateUtility:
             return self.date_to_rate[date], date
 
         rate = None
-        dateStamp = datetime.strptime(date, "%Y-%m-%d")
-        temp = dateStamp
+        date_stamp = datetime.strptime(date, "%Y-%m-%d")
+        temp = date_stamp
 
-        temp = dateStamp - timedelta(days=1)
+        temp = date_stamp - timedelta(days=1)
         rate, temp_date = self._traverse(lambda temp: temp >= self.lower_limit,
                                             lambda temp: temp - timedelta(days=1), temp)
 
@@ -59,4 +59,3 @@ class ExchangeRateUtility:
 
     def get_exchange_rate_last_month(self, date):
         return self.get_exchange_rate(self._get_last_date_of_previous_month(date))
-
