@@ -1,14 +1,10 @@
 from datetime import datetime
 import json
 import os
-import sys
-
 import pytest
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-
-from stockpriceutility import StockPriceUtility # pylint: disable=E0401, C0413
-from exchangerateutility import ExchangeRateUtility # pylint: disable=E0401, C0413
+from stockpriceutility import StockPriceUtility
+from exchangerateutility import ExchangeRateUtility
 
 @pytest.fixture
 def test_case_data():
@@ -37,5 +33,5 @@ def test_stock_price_utility_all_days(test_case_data): # pylint: disable=W0621
 def test_stock_price_utility_inclusivity(test_case_data): # # pylint: disable=W0621
     exchg_rt_utl = ExchangeRateUtility()
     stockpriceutil = StockPriceUtility("MSFT", test_case_data[0], test_case_data[-1], exchg_rt_utl)
-    assert test_case_data[-1] in stockpriceutil.date_to_peak_price.keys()
-    assert test_case_data[0] in stockpriceutil.date_to_peak_price.keys()
+    assert test_case_data[-1] in stockpriceutil.date_to_peak_price
+    assert test_case_data[0] in stockpriceutil.date_to_peak_price
