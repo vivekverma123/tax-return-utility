@@ -26,6 +26,7 @@ class ExchangeRateUtility:
 
     def _traverse(self, check, update, temp):
         rate = None
+        temp_date = None
         while(rate is None and check(temp)):
             temp_date = str(temp.date())
             if temp_date in self.date_to_rate and self.date_to_rate[temp_date] != 0:
@@ -41,7 +42,7 @@ class ExchangeRateUtility:
         return str(last_day_of_previous_month.date())
 
     def get_exchange_rate(self, date):
-        if date in self.date_to_rate:
+        if date in self.date_to_rate and self.date_to_rate[date] != 0:
             return self.date_to_rate[date], date
 
         rate = None

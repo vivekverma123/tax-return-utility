@@ -16,7 +16,7 @@ class Transaction:
     # Same as InvestmentAccount.unique_id
     account_id: str
     """
-    Uniquely determines a lot of stocks, it's on the user to assign/maintain appropriate value here, the code will only 
+    Uniquely determines a lot of stocks, it's on the user to assign/maintain appropriate value here, the code will only
     perform minimal validation
     """
     date: str
