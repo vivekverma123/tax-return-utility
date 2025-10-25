@@ -1,0 +1,51 @@
+{
+  "mock_exchange_rates": {
+    "dates": ["2023-01-01 00:00:00", "2023-01-02 00:00:00", "2023-01-05 00:00:00"],
+    "pdf_files": ["file1.pdf", "file2.pdf", "file3.pdf"],
+    "tt_buy_rates": [82.5, 82.7, 82.3]
+  },
+  "zero_rate_test": {
+    "dates": ["2023-01-01 00:00:00", "2023-01-02 00:00:00", "2023-01-03 00:00:00"],
+    "pdf_files": ["file1.pdf", "file2.pdf", "file3.pdf"],
+    "tt_buy_rates": [82.5, 0, 82.7],
+    "test_date": "2023-01-02",
+    "expected_rate": 82.5,
+    "expected_date": "2023-01-01"
+  },
+  "multi_month_test": {
+    "dates": ["2023-01-31 00:00:00", "2023-02-28 00:00:00", "2023-03-31 00:00:00"],
+    "pdf_files": ["file1.pdf", "file2.pdf", "file3.pdf"],
+    "tt_buy_rates": [82.5, 82.8, 83.0],
+    "query_date": "2023-02-15",
+    "expected_rate": 82.5,
+    "expected_date": "2023-01-31"
+  },
+  "date_calculation_tests": [
+    {
+      "input_date": "2023-02-15",
+      "expected_last_month": "2023-01-31"
+    },
+    {
+      "input_date": "2023-03-01",
+      "expected_last_month": "2023-02-28"
+    },
+    {
+      "input_date": "2023-01-15",
+      "expected_last_month": "2022-12-31"
+    }
+  ],
+  "fallback_tests": [
+    {
+      "available_dates": ["2023-01-01", "2023-01-02", "2023-01-05"],
+      "query_date": "2023-01-04",
+      "expected_fallback_rate": 82.7,
+      "expected_fallback_date": "2023-01-02"
+    },
+    {
+      "available_dates": ["2023-01-01", "2023-01-02", "2023-01-05"],
+      "query_date": "2023-01-03",
+      "expected_fallback_rate": 82.7,
+      "expected_fallback_date": "2023-01-02"
+    }
+  ]
+}

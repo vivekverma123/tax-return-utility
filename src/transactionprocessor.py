@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from .exchangerateutility import ExchangeRateUtility
-from .ledger import TransactionType
-from .stockpriceutility import StockPriceUtility
+from src.exchangerateutility import ExchangeRateUtility
+from src.ledger import TransactionType
+from src.stockpriceutility import StockPriceUtility
 
 @dataclass
 class ReportA3:
@@ -108,8 +108,8 @@ class TransactionProcessor:
             cost_of_acquisition_inr=cost_of_acquisition * exchange_rate_acquisition[0],
             total_value_of_consideration=total_value_of_consideration,
             total_value_of_consideration_inr=total_value_of_consideration * exchange_rate_sale[0],
-            buy_metadata=(lot.invested_amount_metadata[0], lot.invested_amount_metadata[1]) + exchange_rate_acquisition,
-            sell_metadata=(t1.sell_price, t1.date) + exchange_rate_sale
+            buy_metadata=lot.invested_amount_metadata[0:2] + tuple(exchange_rate_acquisition),
+            sell_metadata=(t1.sell_price, t1.date) + tuple(exchange_rate_sale)
         )
         cg.gain = round(cg.total_value_of_consideration_inr - cg.cost_of_acquisition_inr, 2)
         difference = relativedelta(

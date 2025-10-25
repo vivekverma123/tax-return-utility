@@ -1,0 +1,103 @@
+{
+  "sample_accounts": [
+    {
+      "account_id": "ACC001",
+      "account_no": "12345",
+      "broker": "Morgan Stanley",
+      "address": "123 Wall St",
+      "zip_code": "10005",
+      "country": "USA",
+      "currency": "USD"
+    },
+    {
+      "account_id": "ACC002",
+      "account_no": "67890",
+      "broker": "Fidelity",
+      "address": "456 Main St",
+      "zip_code": "02101",
+      "country": "USA",
+      "currency": "USD"
+    }
+  ],
+  "sample_transactions": [
+    {
+      "account_id": "ACC001",
+      "date": "2023-01-01",
+      "stock": "AAPL",
+      "lot_id": "LOT001",
+      "transaction_type": "credit",
+      "units": "100",
+      "buy_price": "150.0",
+      "sell_price": "0.0"
+    },
+    {
+      "account_id": "ACC001",
+      "date": "2023-06-01",
+      "stock": "AAPL",
+      "lot_id": "LOT001",
+      "transaction_type": "debit",
+      "units": "50",
+      "buy_price": "0.0",
+      "sell_price": "180.0"
+    },
+    {
+      "account_id": "ACC002",
+      "date": "2023-03-01",
+      "stock": "MSFT",
+      "lot_id": "LOT002",
+      "transaction_type": "credit",
+      "units": "200",
+      "buy_price": "250.0",
+      "sell_price": "0.0"
+    }
+  ],
+  "transaction_type_test_cases": [
+    {
+      "account_id": "ACC001",
+      "date": "2023-01-01",
+      "stock": "AAPL",
+      "lot_id": "LOT001",
+      "transaction_type": "CREDIT",
+      "units": "100",
+      "buy_price": "150.0",
+      "sell_price": "0.0",
+      "expected_type": "CREDIT"
+    },
+    {
+      "account_id": "ACC001",
+      "date": "2023-02-01",
+      "stock": "AAPL",
+      "lot_id": "LOT001",
+      "transaction_type": "debit",
+      "units": "50",
+      "buy_price": "0.0",
+      "sell_price": "180.0",
+      "expected_type": "DEBIT"
+    },
+    {
+      "account_id": "ACC001",
+      "date": "2023-03-01",
+      "stock": "AAPL",
+      "lot_id": "LOT001",
+      "transaction_type": "Split",
+      "units": "2",
+      "buy_price": "0.0",
+      "sell_price": "0.0",
+      "expected_type": "SPLIT"
+    }
+  ],
+  "format_detection_cases": [
+    {
+      "header": ["account_id", "account_no", "broker", "address", "zip_code", "country", "currency"],
+      "expected_format": "account"
+    },
+    {
+      "header": ["account_id", "date", "stock", "lot_id", "transaction_type", "units", "buy_price", "sell_price"],
+      "expected_format": "transaction"
+    },
+    {
+      "header": ["invalid", "header"],
+      "expected_format": "unknown"
+    }
+  ]
+}

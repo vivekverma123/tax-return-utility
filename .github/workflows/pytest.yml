@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest  # Use Ubuntu for the test runner
     strategy:
       matrix:
-        python-version: ["3.9", "3.10"]  # Test across multiple Python versions
+        python-version: ["3.10"]  # Test across multiple Python versions
 
     steps:
     - name: Checkout code
@@ -32,12 +32,11 @@ jobs:
 
     - name: Run tests with pytest
       run: |
-        export PYTHONPATH=$(pwd)/src
-        pytest  -v # Run pytest to execute the tests
+        python3 -m pytest tests --junitxml=report.xml -vvv
 
     - name: Upload test results to GitHub Actions
       if: success()  # Upload only if tests are successful
       uses: actions/upload-artifact@v4
       with:
-        name: test-results
-        path: ./test-reports
+        name: report
+        path: ./report.xml
