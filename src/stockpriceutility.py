@@ -15,6 +15,7 @@ class StockPriceUtility:
         self.exchange_rate_util = exchange_rate_util
         self.date_to_peak_price = {}
         self.date_to_open_price = {}
+        self.date_to_close_price = {}
         self._initialize()
 
     def _initialize(self):
@@ -39,6 +40,7 @@ class StockPriceUtility:
             price_inr = row['High'] * exchange_rate
             self.date_to_peak_price[date] = (price_inr, row['High'], exchange_rate, date_exchange_rate)
             self.date_to_open_price[date] = (row['Open'] * exchange_rate, row['Open'], exchange_rate, date)
+            self.date_to_close_price[date] = (row['Close'] * exchange_rate, row['Close'], exchange_rate, date_exchange_rate)
 
         exchange_rate, date_exchange_rate = self.exchange_rate_util.get_exchange_rate(self.end_date)
         self.closing_price = (rows[-1]['Close'] * exchange_rate, rows[-1]['Close'], str(rows[-1]['Date'].date()), \
@@ -66,3 +68,19 @@ class StockPriceUtility:
     def get_open_price(self, date):
         price = self.date_to_open_price[date]
         return price[0], (price[1], date, price[2], price[3])
+
+    def get_close_price(self, date):
+        rate = None
+        date_stamp = datetime.strptime(date, "%Y-%m-%d")
+        if date_stamp < datetime.strptime(self.start_date, "%Y-%m-%d") or \
+            date_stamp > datetime.strptime(self.end_date, "%Y-%m-%d"):
+            assert 0, f"For stock {self.ticker} requested date is out of range, reinitialize the class"
+        while(rate is None and date_stamp >= self.cut_off):
+            temp_date = str(date_stamp.date())
+            if temp_date in self.date_to_close_price:
+                rate = self.date_to_close_price[temp_date]
+                break
+            date_stamp = date_stamp - timedelta(days=1)
+        if rate is None:
+            assert 0, f"Stock {self.ticker} data not available for the requested date {date}"
+        return rate[0], (rate[1], str(date_stamp.date()), rate[2], rate[3])
